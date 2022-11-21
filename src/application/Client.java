@@ -11,6 +11,7 @@ public class Client {
 
     public static void main(String[] args) throws IOException {
         InetAddress address = InetAddress.getLocalHost();
+        final int PORT_NUM = 8888;
         Socket s1 = null;
         String line = null;
         BufferedReader br = null;
@@ -18,7 +19,7 @@ public class Client {
         PrintWriter os = null;
 
         try {
-            s1 = new Socket(address, 8888); // You can use static final constant PORT_NUM
+            s1 = new Socket(address, PORT_NUM); // You can use static final constant PORT_NUM
             br = new BufferedReader(new InputStreamReader(System.in));
             is = new BufferedReader(new InputStreamReader(s1.getInputStream()));
             os = new PrintWriter(s1.getOutputStream());
@@ -28,7 +29,7 @@ public class Client {
         }
 
         System.out.println("Client Address : " + address);
-        System.out.println("Enter Data to echo Server ( Enter QUIT to end):");
+        System.out.println("Enter Data to echo Server (Enter QUIT to end):");
 
         String response = null;
         try {

@@ -13,10 +13,11 @@ public class Server {
 
         Socket socket = null;
         ServerSocket serverSocket = null;
+        final int PORT_NUM = 8888;
         System.out.println("Server Listening......");
 
         try {
-            serverSocket = new ServerSocket(8888); // can also use static final PORT_NUM , when defined
+            serverSocket = new ServerSocket(PORT_NUM);
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Server error");
@@ -30,11 +31,9 @@ public class Server {
                 System.out.println("connection Established");
                 ServerThread st = new ServerThread(socket);
                 st.start();
-
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Connection Error");
-
             }
         }
 
