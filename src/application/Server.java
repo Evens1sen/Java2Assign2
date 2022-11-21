@@ -6,9 +6,40 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.*;
 
 
 public class Server {
+
+    static Map<Integer, User> users = new HashMap<>();
+    static List<Integer> onlineUsers = new ArrayList<>();
+    static List<Game> gameList = new ArrayList<>();
+
+    public static int registerUser(String password) {
+        int baseId = 1000000;
+        int userId = baseId + users.size() + 1;
+        users.put(userId, new User(userId, password));
+        return userId;
+    }
+
+    public static boolean logIn(int userId, String password) {
+        User user = users.get(userId);
+        if (user == null) {
+            return false;
+        }
+
+        if (Objects.equals(password, user.password)) {
+            onlineUsers.add(userId);
+            return true;
+        }
+
+        return false;
+    }
+
+    public static void startGame(int user1, int user2) {
+        gameList.add(new Game(users.get(user1), users.get(user2)));
+    }
+
     public static void main(String[] args) {
 
         Socket socket = null;
@@ -21,7 +52,6 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Server error");
-
         }
 
         while (true) {
