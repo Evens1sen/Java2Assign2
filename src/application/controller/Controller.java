@@ -40,7 +40,7 @@ public class Controller implements Initializable {
         });
     }
 
-    private boolean refreshBoard (int x, int y) {
+    private boolean refreshBoard(int x, int y) {
         if (chessBoard[x][y] == EMPTY) {
             chessBoard[x][y] = TURN ? PLAY_1 : PLAY_2;
             drawChess();
@@ -49,7 +49,7 @@ public class Controller implements Initializable {
         return false;
     }
 
-    private void drawChess () {
+    private void drawChess() {
         for (int i = 0; i < chessBoard.length; i++) {
             for (int j = 0; j < chessBoard[0].length; j++) {
                 if (flag[i][j]) {
@@ -73,7 +73,7 @@ public class Controller implements Initializable {
         }
     }
 
-    private void drawCircle (int i, int j) {
+    private void drawCircle(int i, int j) {
         Circle circle = new Circle();
         base_square.getChildren().add(circle);
         circle.setCenterX(i * BOUND + BOUND / 2.0 + OFFSET);
@@ -84,7 +84,7 @@ public class Controller implements Initializable {
         flag[i][j] = true;
     }
 
-    private void drawLine (int i, int j) {
+    private void drawLine(int i, int j) {
         Line line_a = new Line();
         Line line_b = new Line();
         base_square.getChildren().add(line_a);
