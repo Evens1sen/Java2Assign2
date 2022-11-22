@@ -7,18 +7,18 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class Server {
 
     static Map<Integer, User> users = new HashMap<>();
-    static List<Integer> freeUsers = new ArrayList<>();
-    static List<Integer> matchedUsers = new ArrayList<>();
+    static List<Integer> onlineUsers = new ArrayList<>();
     static Map<Integer, Game> games = new HashMap<>();
 
     // register/password
     public static int register(String password) {
-        int baseId = 1000000;
+        int baseId = 0;
         int userId = baseId + users.size() + 1;
         users.put(userId, new User(userId, password));
         return userId;
@@ -32,45 +32,44 @@ public class Server {
         }
 
         if (Objects.equals(password, user.password)) {
-            freeUsers.add(userId);
+            onlineUsers.add(userId);
             return true;
         }
 
         return false;
     }
 
-    // getFreeUsers/userId
-    public static List<Integer> getFreeUsers(int userId) {
-        List<Integer> res = new ArrayList<>(freeUsers);
-        res.remove(userId);
-        return res;
+    // logOut/userId
+    public static void logOut(int userId) {
+        onlineUsers.remove((Integer) userId);
     }
 
-    // matchGame/userId
-    public static Game matchGame(int userId) {
-//        if (freeUsers.size() < 2) {
-//            return null;
-//        }
-//
-//        if (freeUsers.size() == 2) {
-//            return freeUsers.remove(0);
-//        }
-//
-//        return freeUsers.remove(0);
-        return null;
+    // createGame/userId
+    public static int createGame(int userId) {
+        int gameId = 100 + games.size() + 1;
+        games.put(gameId, new Game(gameId, userId, 0));
+        return gameId;
     }
 
-    // matchPlayer/userId
-    public static int matchPlayer(int userId) {
-        if (freeUsers.size() < 2) {
+    // getJoinableGames/userId
+    public static List<Integer> getJoinableGames(int userId) {
+        return games.values()
+                .stream()
+                .filter(game -> game.winner == -1 && game.player1 != userId && game.player2 != userId)
+                .map(Game::getGameId)
+                .collect(Collectors.toList());
+    }
+
+    // joinAndStartGame/userId/gameId
+    public static int joinAndStartGame(int userId, int gameId) {
+        Game toJoin = games.get(gameId);
+        if (toJoin == null) {
             return 0;
         }
 
-        if (freeUsers.size() == 2) {
-            return freeUsers.remove(0);
-        }
-
-        return freeUsers.remove(0);
+        toJoin.player2 = userId;
+        toJoin.winner = 0;
+        return toJoin.player1;
     }
 
     // startGame/user1/user2
@@ -139,20 +138,19 @@ public class Server {
                 String password = requestFields[2];
                 boolean result = logIn(userId, password);
                 response = String.valueOf(result);
-            } else if (Objects.equals(methodName, "getFreeUsers")) {
+            } else if (Objects.equals(methodName, "logOut")) {
                 int userId = Integer.parseInt(requestFields[1]);
-                response = getFreeUsers(userId).toString();
-            } else if (Objects.equals(methodName, "matchPlayer")) {
+                logOut(userId);
+            } else if (Objects.equals(methodName, "createGame")) {
                 int userId = Integer.parseInt(requestFields[1]);
-                int result = matchPlayer(userId);
-                response = String.valueOf(result);
-            } else if (Objects.equals(methodName, "startGame")) {
-                int player1 = Integer.parseInt(requestFields[1]);
-                int player2 = Integer.parseInt(requestFields[2]);
-                int gameId = startGame(player1, player2);
-                response = String.valueOf(gameId);
-            } else if (Objects.equals(methodName, "makeMove")) {
-                return null;
+                response = String.valueOf(createGame(userId));
+            } else if (Objects.equals(methodName, "getJoinableGames")) {
+                int userId = Integer.parseInt(requestFields[1]);
+                response = getJoinableGames(userId).toString();
+            } else if (Objects.equals(methodName, "joinAndStartGame")) {
+                int userId = Integer.parseInt(requestFields[1]);
+                int gameId = Integer.parseInt(requestFields[2]);
+                response = String.valueOf(joinAndStartGame(userId, gameId));
             }
 
             return response;

@@ -12,7 +12,7 @@ public class Game {
 
     int turn; // 1 or 2
 
-    int winner; // 0 (in progress), 1, 2 or 3 (for a tie)
+    int winner; // -1 (waiting), 0 (in progress), 1, 2 or 3 (for a tie)
 
     final int[][] chessBoard = new int[3][3];
 
@@ -21,7 +21,7 @@ public class Game {
         this.player1 = player1;
         this.player2 = player2;
         turn = 1;
-        winner = 0;
+        winner = -1;
     }
 
     // The player in turn set a chess at (x, y)
@@ -75,5 +75,36 @@ public class Game {
                 .replace("[", "")
                 .replace("[[", "")
                 .replace("]]", ""));
+    }
+
+    public int getGameId() {
+        return gameId;
+    }
+
+    public int getPlayer1() {
+        return player1;
+    }
+
+    public int getPlayer2() {
+        return player2;
+    }
+
+    public int getTurn() {
+        return turn;
+    }
+
+    public int getWinner() {
+        return winner;
+    }
+
+    @Override
+    public String toString() {
+        return "Game{" +
+                "gameId=" + gameId +
+                ", player1=" + player1 +
+                ", player2=" + player2 +
+                ", turn=" + turn +
+                ", winner=" + winner +
+                '}';
     }
 }
