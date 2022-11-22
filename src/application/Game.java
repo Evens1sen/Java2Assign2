@@ -1,12 +1,14 @@
 package application;
 
-import java.util.List;
+import java.util.Arrays;
 
 public class Game {
 
-    User player1;
+    int gameId;
 
-    User player2;
+    int player1;
+
+    int player2;
 
     int turn; // 1 or 2
 
@@ -14,7 +16,8 @@ public class Game {
 
     final int[][] chessBoard = new int[3][3];
 
-    public Game(User player1, User player2) {
+    public Game(int gameId, int player1, int player2) {
+        this.gameId = gameId;
         this.player1 = player1;
         this.player2 = player2;
         turn = 1;
@@ -64,5 +67,13 @@ public class Game {
         }
 
         return true;
+    }
+
+    public void printBoard() {
+        System.out.println(Arrays.deepToString(chessBoard)
+                .replace("], ", "\n")
+                .replace("[", "")
+                .replace("[[", "")
+                .replace("]]", ""));
     }
 }
