@@ -1,6 +1,8 @@
 package application;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Game {
 
@@ -13,6 +15,8 @@ public class Game {
     int turn; // 1 or 2
 
     int winner; // -1 (waiting), 0 (in progress), 1, 2 or 3 (for a tie)
+
+    List<int[]> steps = new ArrayList<>();
 
     final int[][] chessBoard = new int[3][3];
 
@@ -29,6 +33,7 @@ public class Game {
         if (chessBoard[x][y] == 0) {
             chessBoard[x][y] = turn;
             turn = (turn + 1) % 2;
+            steps.add(new int[]{x, y});
             return true;
         }
 
@@ -41,23 +46,23 @@ public class Game {
         int prev = (turn + 1) % 2;
         if (winner == 0) {
             // horizon
-            if (chessBoard[x][y] == chessBoard[x][(y + 1) % 2] &&
-                    chessBoard[x][y] == chessBoard[x][(y + 2) % 2]) {
+            if (chessBoard[x][y] == chessBoard[x][(y + 1) % 2]
+                    && chessBoard[x][y] == chessBoard[x][(y + 2) % 2]) {
                 winner = prev;
                 return true;
             }
 
             // vertical
-            if (chessBoard[x][y] == chessBoard[(x + 1) % 2][y] &&
-                    chessBoard[x][y] == chessBoard[(x + 2) % 2][y]) {
+            if (chessBoard[x][y] == chessBoard[(x + 1) % 2][y]
+                    && chessBoard[x][y] == chessBoard[(x + 2) % 2][y]) {
                 winner = prev;
                 return true;
             }
 
             // diagonal
             if (x == y || x == (y + 2) % 2) {
-                if (chessBoard[x][y] == chessBoard[(x + 1) % 2][(y + 1) % 2] &&
-                        chessBoard[x][y] == chessBoard[(x + 2) % 2][(y + 2) % 2]) {
+                if (chessBoard[x][y] == chessBoard[(x + 1) % 2][(y + 1) % 2]
+                        && chessBoard[x][y] == chessBoard[(x + 2) % 2][(y + 2) % 2]) {
                     winner = prev;
                     return true;
                 }
@@ -99,12 +104,12 @@ public class Game {
 
     @Override
     public String toString() {
-        return "Game{" +
-                "gameId=" + gameId +
-                ", player1=" + player1 +
-                ", player2=" + player2 +
-                ", turn=" + turn +
-                ", winner=" + winner +
-                '}';
+        return "Game{"
+                + "gameId=" + gameId
+                + ", player1=" + player1
+                + ", player2=" + player2
+                + ", turn=" + turn
+                + ", winner=" + winner
+                + '}';
     }
 }

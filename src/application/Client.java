@@ -6,18 +6,19 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.Objects;
 import java.util.Scanner;
 
 public class Client {
 
     static int currentUser;
 
+    static int playerIndex;
+
     static Game currentGame;
 
     public static void main(String[] args) throws IOException {
         InetAddress address = InetAddress.getLocalHost();
-        final int PORT_NUM = 8888;
+        final int port = 8888;
         Socket s1 = null;
         BufferedReader br = null;
         Scanner in = null;
@@ -25,7 +26,7 @@ public class Client {
         PrintWriter os = null;
 
         try {
-            s1 = new Socket(address, PORT_NUM);
+            s1 = new Socket(address, port);
             br = new BufferedReader(new InputStreamReader(System.in));
             in = new Scanner(System.in);
             is = new BufferedReader(new InputStreamReader(s1.getInputStream()));
@@ -85,6 +86,7 @@ public class Client {
                     response = sendRequest(request, os, is);
                     System.out.println("You created game with id: " + response);
                     currentGame = new Game(Integer.parseInt(response), currentUser, 0);
+                    playerIndex = 1;
                     break;
                 } else {
                     request = String.format("getJoinableGames/%d", currentUser);
@@ -99,6 +101,8 @@ public class Client {
                         if (!response.equals("0")) {
                             System.out.println("You joined game with id: " + gameId);
                             currentGame = new Game(gameId, Integer.parseInt(response), currentUser);
+                            currentGame.winner = 0;
+                            playerIndex = 2;
                             break;
                         }
                         System.out.println("Join failed");
@@ -108,8 +112,38 @@ public class Client {
                 }
             }
 
+
+            // Connect to a game
             System.out.println("Current User: " + currentUser);
             System.out.println("Current Game: " + currentGame);
+            System.out.println("Game Start: ");
+            currentGame.printBoard();
+
+            while (currentGame.winner == 0) {
+                int x;
+                int y;
+                if (playerIndex == currentGame.turn) {
+                    System.out.println("Please input position to set cheese");
+                    x = in.nextInt();
+                    y = in.nextInt();
+                    request = String.format("setChess/%d/%d/%d", currentGame.gameId, x, y);
+                    response = sendRequest(request, os, is);
+                } else {
+                    request = String.format("getOpponentStep/%d", currentGame.gameId);
+                    response = sendRequest(request, os, is);
+                    x = response.charAt(1) - '0';
+                    y = response.charAt(4) - '0';
+                    System.out.println("Another player is considering");
+                }
+
+                currentGame.setChess(x, y);
+                currentGame.printBoard();
+                if (currentGame.canFinish(x, y)) {
+                    currentGame.winner = (currentGame.turn + 1) % 2;
+                    System.out.println("Game Finish, player" + currentGame.winner + "win");
+                }
+            }
+
             while (true) {
                 Thread.sleep(10);
             }
@@ -134,7 +168,9 @@ public class Client {
 
     }
 
-    public static String sendRequest(String request, PrintWriter os, BufferedReader is) throws IOException {
+    public static String sendRequest(String request,
+                                     PrintWriter os,
+                                     BufferedReader is) throws IOException {
         os.println(request);
         os.flush();
         return is.readLine();

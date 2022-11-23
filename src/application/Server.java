@@ -55,7 +55,9 @@ public class Server {
     public static List<Integer> getJoinableGames(int userId) {
         return games.values()
                 .stream()
-                .filter(game -> game.winner == -1 && game.player1 != userId && game.player2 != userId)
+                .filter(game -> game.winner == -1
+                        && game.player1 != userId
+                        && game.player2 != userId)
                 .map(Game::getGameId)
                 .collect(Collectors.toList());
     }
@@ -72,27 +74,35 @@ public class Server {
         return toJoin.player1;
     }
 
-    // startGame/user1/user2
-    public static int startGame(int user1, int user2) {
-        int gameId = 1000 + games.size() + 1;
-        games.put(gameId, new Game(gameId, user1, user2));
-        return gameId;
+    // setChess/gameId/x/y
+    public static boolean setChess(int gameId, int x, int y) {
+        Game game = games.get(gameId);
+        if (game == null) {
+            return false;
+        }
+
+        return game.setChess(x, y);
     }
 
-    // makeMove/gameId/player/x/y
-    public static boolean makeMove(int gameId, int player, int x, int y) {
-        return false;
+    // getOpponentStep/gameId
+    public static int[] getOpponentStep(int gameId) {
+        Game game = games.get(gameId);
+        if (game == null) {
+            return null;
+        }
+
+        return game.steps.get(game.steps.size() - 1);
     }
 
     public static void main(String[] args) {
 
         Socket socket = null;
         ServerSocket serverSocket = null;
-        final int PORT_NUM = 8888;
+        final int port = 8888;
         System.out.println("Server Listening......");
 
         try {
-            serverSocket = new ServerSocket(PORT_NUM);
+            serverSocket = new ServerSocket(port);
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Server error");
@@ -151,6 +161,14 @@ public class Server {
                 int userId = Integer.parseInt(requestFields[1]);
                 int gameId = Integer.parseInt(requestFields[2]);
                 response = String.valueOf(joinAndStartGame(userId, gameId));
+            } else if (Objects.equals(methodName, "getOpponentStep")) {
+                int gameId = Integer.parseInt(requestFields[1]);
+                response = Arrays.toString(getOpponentStep(gameId));
+            } else if (Objects.equals(methodName, "setChess")) {
+                int gameId = Integer.parseInt(requestFields[1]);
+                int x = Integer.parseInt(requestFields[2]);
+                int y = Integer.parseInt(requestFields[3]);
+                response = String.valueOf(setChess(gameId, x, y));
             }
 
             return response;
